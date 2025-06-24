@@ -20,6 +20,22 @@
 - 🔄 **强制刷新缓存** - 支持强制从数据库重新获取数据
 - 🛡️ **Redis容错** - Redis服务异常时，自动降级服务，不影响核心功能
 
+## 项目截图
+
+### API文档界面
+![API Documentation](./readme.api.png)
+
+### Swagger UI界面
+![Swagger UI](./readme.swigger.png)
+
+## GitHub统计
+
+![GitHub stars](https://img.shields.io/github/stars/your-username/python-mongodb-api?style=social)
+![GitHub forks](https://img.shields.io/github/forks/your-username/python-mongodb-api?style=social)
+![GitHub issues](https://img.shields.io/github/issues/your-username/python-mongodb-api)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/your-username/python-mongodb-api)
+![GitHub license](https://img.shields.io/github/license/your-username/python-mongodb-api)
+
 ## 安装依赖
 
 ```bash

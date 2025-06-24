@@ -20,6 +20,22 @@ A complete Python MongoDB query API, supporting both direct API calls and HTTP R
 - 🔄 **Force Refresh Cache** - Force data refresh from DB
 - 🛡️ **Redis Fallback** - Redis errors will not affect core features
 
+## Project Screenshots
+
+### API Documentation Interface
+![API Documentation](./readme.api.png)
+
+### Swagger UI Interface
+![Swagger UI](./readme.swigger.png)
+
+## GitHub Stats
+
+![GitHub stars](https://img.shields.io/github/stars/your-username/python-mongodb-api?style=social)
+![GitHub forks](https://img.shields.io/github/forks/your-username/python-mongodb-api?style=social)
+![GitHub issues](https://img.shields.io/github/issues/your-username/python-mongodb-api)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/your-username/python-mongodb-api)
+![GitHub license](https://img.shields.io/github/license/your-username/python-mongodb-api)
+
 ## Installation
 
 ```bash

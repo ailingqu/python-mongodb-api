@@ -1,7 +1,7 @@
 version: '3.8'
 services:  
   mongodb-api:
-    build: registry.cn-hangzhou.aliyuncs.com/dafan-ai/mongodb-api-python:1.4 
+    build: registry.cn-hangzhou.aliyuncs.com/dafan-ai/mongodb-api-python:1.6 
     container_name: python-mongodb-api
     restart: always
     ports:

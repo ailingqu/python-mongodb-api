@@ -23,8 +23,12 @@ RUN pip install -r requirements.txt
 # 6. 复制项目代码
 COPY . /app/
 
-# 7. 暴露端口
+# # 7. 暴露端口
+# EXPOSE 8000
+
+# # 8. 设置默认启动命令
+# CMD ["python", "start_api.py", "--host", "0.0.0.0"]
+
 EXPOSE 8000
 
-# 8. 设置默认启动命令
-CMD ["python", "start_api.py", "--host", "0.0.0.0"]
+CMD ["gunicorn", "fastapi_mongodb:app", "-k", "uvicorn.workers.UvicornWorker", "-w", "4", "-b", "0.0.0.0:8000", "--timeout", "60"]

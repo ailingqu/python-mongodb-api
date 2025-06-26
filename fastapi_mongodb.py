@@ -81,6 +81,10 @@ app = FastAPI(
     openapi_tags=swagger_config["tags"]
 )
 
+# ⚡️就在这里添加！
+from fastapi.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # 添加CORS中间件
 app.add_middleware(
     CORSMiddleware,
@@ -417,6 +421,7 @@ class ApiResponse(BaseModel):
     message: str = Field(..., description="响应消息")
     data: Optional[Any] = Field(default=None, description="响应数据")
     count: Optional[int] = Field(default=None, description="数据条数")
+    cache_ttl: Optional[int] = Field(default=None, description="缓存时间（秒）")
     timestamp: str = Field(..., description="响应时间戳")
 
     @model_serializer
@@ -430,6 +435,8 @@ class ApiResponse(BaseModel):
         }
         if self.count is not None:
             response['count'] = self.count
+        if self.cache_ttl is not None:
+            response['cache_ttl'] = self.cache_ttl
         return response
 
     class Config:
@@ -604,11 +611,13 @@ async def query_documents(
         cache_key = redis_cache.generate_cache_key("query", request.dict())
         cached_result = redis_cache.get(cache_key)
         if cached_result:
-            # 如果命中缓存，直接返回结果
+            # 如果命中缓存，直接返回结果，不创建MongoDB连接
             cached_result["message"] = f"查询成功 (来自缓存)，返回 {cached_result.get('count', 0)} 个文档"
+            # 添加缓存时间信息
+            cached_result["cache_ttl"] = request.cache_ttl
             return ApiResponse(**cached_result)
 
-    # 2. 从数据库查询
+    # 2. 只有缓存未命中时才创建MongoDB连接和查询
     api = MongoDBQueryAPI()
     
     try:
@@ -645,6 +654,8 @@ async def query_documents(
             if cache_key is None: # 如果是强制刷新，之前没生成key
                 cache_key = redis_cache.generate_cache_key("query", request.dict())
             redis_cache.set(cache_key, result, ttl=request.cache_ttl)
+            # 添加缓存时间信息到响应
+            result["cache_ttl"] = request.cache_ttl
 
         return ApiResponse(**result)
         
@@ -754,10 +765,13 @@ async def query_one_document(
         cache_key = redis_cache.generate_cache_key("query_one", request.dict())
         cached_result = redis_cache.get(cache_key)
         if cached_result:
+            # 如果命中缓存，直接返回结果，不创建MongoDB连接
             cached_result["message"] = f"查询单个文档成功 (来自缓存)"
+            # 添加缓存时间信息
+            cached_result["cache_ttl"] = request.cache_ttl
             return ApiResponse(**cached_result)
 
-    # 2. 从数据库查询
+    # 2. 只有缓存未命中时才创建MongoDB连接和查询
     api = MongoDBQueryAPI()
     
     try:
@@ -792,6 +806,8 @@ async def query_one_document(
             if cache_key is None: # 如果是强制刷新，之前没生成key
                 cache_key = redis_cache.generate_cache_key("query_one", request.dict())
             redis_cache.set(cache_key, result, ttl=request.cache_ttl)
+            # 添加缓存时间信息到响应
+            result["cache_ttl"] = request.cache_ttl
 
         return ApiResponse(**result)
         
@@ -869,10 +885,13 @@ async def aggregate_documents(
         cache_key = redis_cache.generate_cache_key("aggregate", request.dict())
         cached_result = redis_cache.get(cache_key)
         if cached_result:
+            # 如果命中缓存，直接返回结果，不创建MongoDB连接
             cached_result["message"] = f"聚合查询成功 (来自缓存)，返回 {cached_result.get('count', 0)} 个文档"
+            # 添加缓存时间信息
+            cached_result["cache_ttl"] = request.cache_ttl
             return ApiResponse(**cached_result)
 
-    # 2. 从数据库查询
+    # 2. 只有缓存未命中时才创建MongoDB连接和查询
     api = MongoDBQueryAPI()
     
     try:
@@ -898,6 +917,8 @@ async def aggregate_documents(
             if cache_key is None: # 如果是强制刷新，之前没生成key
                 cache_key = redis_cache.generate_cache_key("aggregate", request.dict())
             redis_cache.set(cache_key, result, ttl=request.cache_ttl)
+            # 添加缓存时间信息到响应
+            result["cache_ttl"] = request.cache_ttl
 
         return ApiResponse(**result)
         
@@ -983,10 +1004,13 @@ async def distinct_documents(
         cache_key = redis_cache.generate_cache_key("distinct", request.dict())
         cached_result = redis_cache.get(cache_key)
         if cached_result:
+            # 如果命中缓存，直接返回结果，不创建MongoDB连接
             cached_result["message"] = f"distinct查询成功 (来自缓存)，字段 '{request.field}' 返回 {cached_result.get('data', {}).get('count', 0)} 个唯一值"
+            # 添加缓存时间信息
+            cached_result["cache_ttl"] = request.cache_ttl
             return ApiResponse(**cached_result)
 
-    # 2. 从数据库查询
+    # 2. 只有缓存未命中时才创建MongoDB连接和查询
     api = MongoDBQueryAPI()
     
     try:
@@ -1012,6 +1036,8 @@ async def distinct_documents(
             if cache_key is None: # 如果是强制刷新，之前没生成key
                 cache_key = redis_cache.generate_cache_key("distinct", request.dict())
             redis_cache.set(cache_key, result, ttl=request.cache_ttl)
+            # 添加缓存时间信息到响应
+            result["cache_ttl"] = request.cache_ttl
 
         return ApiResponse(**result)
         
